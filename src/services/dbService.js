@@ -350,17 +350,22 @@ const firebaseAuthService = {
 const firebaseDbService = {
   getExpenses: async (userId) => {
     const q = query(
-      collection(db, "expenses"), 
-      where("uid", "==", userId), 
-      orderBy("date", "desc")
+      collection(db, "expenses"),
+      where("uid", "==", userId)
     );
+
     const querySnapshot = await getDocs(q);
-    const expenses = [];
-    querySnapshot.forEach((doc) => {
-      expenses.push({ id: doc.id, ...doc.data() });
-    });
+
+    const expenses = querySnapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
     return expenses;
   },
+
   addExpense: async (userId, expenseData) => {
     const data = {
       uid: userId,
@@ -385,18 +390,22 @@ const firebaseDbService = {
     return true;
   },
   getIncomes: async (userId) => {
-    const q = query(
-      collection(db, "incomes"),
-      where("uid", "==", userId),
-      orderBy("date", "desc")
-    );
-    const querySnapshot = await getDocs(q);
-    const incomes = [];
-    querySnapshot.forEach((doc) => {
-      incomes.push({ id: doc.id, ...doc.data() });
-    });
-    return incomes;
-  },
+  const q = query(
+    collection(db, "incomes"),
+    where("uid", "==", userId)
+  );
+
+  const querySnapshot = await getDocs(q);
+
+  const incomes = querySnapshot.docs
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return incomes;
+},
   addIncome: async (userId, incomeData) => {
     const data = {
       uid: userId,
